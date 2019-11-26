@@ -80,20 +80,20 @@ def test_moisture(m):
 def test_light_leds(l):
     sensor_above_threshold = int(l) > config_light_threshold
     if sensor_above_threshold:
+        print "Lights off"
+    else:
         GPIO.output(leds, 0)
         time.sleep(config_leds_time)
         GPIO.output(leds, 1)
         print "Leds flashed"
-    else:
-        print "Lights off"
 
     if sensor_above_threshold:
+        print "Buzzer off"
+    else:
         GPIO.output(piezo, 0)
         time.sleep(config_pieso_time)
         GPIO.output(piezo, 1)
         print "Piezo was buzzed"
-    else:
-        print "Buzzer off"
 
 # Posts sensor data to web service
 def upload_data(light, moisture):
@@ -135,6 +135,12 @@ def bytes2int(byes):
 # Main script loop
 while True:
     [light, moisture] = read_sensor_data()
+    print "Light sensor data"
+    print light
+    print "\n"
+    print "Moisture sensor data"
+    print moisture
+    print "\n"
     test_moisture(moisture)
     test_light_leds(light)
 
