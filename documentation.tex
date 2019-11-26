@@ -1,0 +1,404 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX code written by Phoenix Yu Wilkie
+% Document created by Team 1
+% CISC340 Plant AutoHydration/Light System
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[a4paper]{article}
+
+\usepackage{hyperref}
+
+\usepackage[english]{babel} \usepackage{hyperref} \usepackage{float}
+\usepackage[utf8]{inputenc} \usepackage{amsmath} \usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes} \usepackage{tikz}
+\usepackage{pdfpages} \usepackage{listings}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{green}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=C,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{green},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\usetikzlibrary{arrows,positioning,shapes.geometric}
+
+\begin{document} \maketitle
+\begin{center}
+\fbox{\resizebox{8cm}{!}{\includegraphics{onyx.jpg}}}
+\vskip 0.8cm
+
+\baselineskip 1cm
+\title{{\LARGE \bf  Documentation: \\ 
+Automated Hydration and Light System
+}}
+%\vskip 1cm
+
+{\large CISC 340: Digital Systems}\\
+
+%%\vskip 0.5cm
+\vskip 1cm
+\author{{\large by \\
+Phoenix Yu Wilkie, Andrew Lazenka, Chuyan Zheng, Bella Zhong}}\\
+\end{center}
+
+
+
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Abstract}
+Turning a pump on and off sounds pretty simple when done with digital logic, but how do you approach the merger of communication between software and hardware? Through the past couple of months, we have explored the answer to this question by creating an Internet of Things (IOT), automated plant hydration and light checking system. Through the manipulation of the General Purpose Input/Output (GPIO), we created a device that allows the communication between the user space and the Kernel. Thus, we built a system that allows for the software and hardware to work seamlessly to help you take care of your plants.
+
+\section{Introduction}
+Before the creation of our automated plant hydration system, we had to first choose components from three groups to formulate what our project would entail and gain exposure to simple devices to interface with micro-controllers. Firstly, from the Sensor Group, we decided to use both an ambient light sensor and a moisture sensor. Secondly, for an output device that required additional VHDL code, we chose the piezo buzzer as our alarm for notifying that the plants are in low-light conditions. Finally, we chose to use the Digilent Basys3 onboard LEDs to compliment the piezo buzzer when signaling low-light conditions. We used the Basys3 board with FPGA embedded microprocessors as the platform for our sensors and output devices. We extended the communication of the micro-controllers and their connected interfaces to develop an IOT system that can communicate with the internet via a web service installed on a Raspberry Pi Zero (Rpi). This can be accessed from a mobile device and/or computer and receives push notifications. We then implemented the VHDL program that worked in tangent to produce our wanted results to enhance our project and replace the existing software. Finally, the Basys3 board is connected to the Rpi with a double ended microUSB cable to send data using serial (ASCII) messages as a unidirectional I/O. From here, the Rpi sends data to the Basys3 via GPIO General Purpose Input/Output pins of the Rpi connected to one of the PMOD connectors on the Basys3 \cite{Git}.
+
+
+
+\section{Objectives}
+The main goals of the project were:
+\begin{enumerate}
+    \item To apply all the concepts learned in class by developing a working IOT project to water plants and warn the owner of nonoptimal light conditions.
+    \begin{enumerate}
+        \item Whenever the moisture content of the soil of the target plant is below the designated threshold, the plant is watered.
+        \item Whenever the system is on and the light conditions are below the designated threshold, the plant is not receiving enough light and an alarm and LEDs are triggered.
+    \end{enumerate}
+    \item To work collaboratively as a team to effectively plan, manage, and complete our product within the alloted time-frame and present it as a video to the class.
+    \item To research, create, demonstrate, and document our hydration and light system including information on the hardware and software.
+\end{enumerate}
+
+
+\section{Justification}
+
+This project was developed under the scope of the coursework for Queen's School of Computing, CISC 340, Digital Systems. All materials and the base code was provided to us for the completion of this project.
+
+\section{Development}
+
+The following section covers hardware, the Rpi software, the end data application, and an overview of the team dynamic with problems and memorable events.
+
+\subsection{Hardware}
+
+The Basys3 board of the project connects two sensors through the breadboard (a moisture sensor and an ambient light sensor).  Before the communication was built between the Rpi and Basys3, our team first tested the functionalities of the sensors by using Tera Term.
+
+Tera Term is a terminal emulator program, which supports inputs from telnet, SSH1\&2 and  serial port connections. In order to test the completion level of both sensors without the support from Rpi, we observed the changing data sent from sensors on the terminal to decide if the team should move to the next task.
+
+A few steps were required to receive data from sensors to the Tera Term terminal. Firstly, we moved the programming mode jumper to cover the first two pins (as shown in \textbf{Figure \ref{fig:Basys3}}). By changing the covered pins, the FPGA that is programmed by the circuit will be automatically generated in the system, according to Basys Reference \cite{basys}. Secondly, we connected the Tera Term terminal to the Basys3 through serial port 6 using a USB cable. Once the program was activated, the terminal read data from our two sensors through the Basys3, line by line.
+
+The moisture sensor measures the volumetric water content in soil. When the circuits of the moisture sensor are correctly connected, the data presenting water content will dramatically increase when moisture is applied to the sensor, and it subsequently drops back to its original number when the moisture is wiped off. To test this, we carefully applied some drops of water to the sensor and watched the output from Tera Term. As for the ambient light sensor, it measures the amount of light present. Similarly, when the circuits of the light sensor are correctly connected, the data presenting the light amount increases when light is given, and decreases otherwise. We tested this by using a flashlight to simulate intense light and covering the sensor with our fingers in order to remove light.  \textbf{Figure \ref{fig:system}} shows the schematic diagram of our entire system.
+
+\begin{center}
+\begin{figure}
+  \resizebox{12cm}{!}{\includegraphics{basys3.png}}
+  \caption{Features of the Basys3 board.}
+  \label{fig:Basys3}
+\end{figure}
+ 
+\begin{figure}
+  \resizebox{12cm}{!}{\includegraphics{systemfinal.png}}
+  \caption{An overview schematic diagram of the whole system.}
+  \label{fig:system}
+\end{figure}
+
+\begin{figure}
+  \resizebox{15cm}{!}{\includegraphics{BlockDiagram.jpeg}}
+  \caption{Vivado final Block Diagram.}
+  \label{fig:BlockDiagram}
+\end{figure}
+
+%\begin{figure}
+%  \resizebox{15cm}{!}{\includegraphics{SchematicDiagram.jpg}}
+%  \caption{Vivado final Schematic Diagram.}
+%  \label{fig:SchematicDiagram}
+%\end{figure}
+\end{center}
+
+\subsubsection{Microblaze {\it main.c}}
+\label{sec:microblaze}
+As outlined in the project requirements, groups were instructed to modify the C script so that all functions to serve their system will be completed and for the system to work well to respond to their needs. Our C script reads the output signal from the serial port of the Rpi. The signal is collected and analyzed so that the Basys3 board can control the onboard LEDs and piezo buzzer in coordination with the Rpi receiving information from the analog sensors. The water pump receives the signal '0' or '1' to open or close directly from the Rpi, so the C script does not control the water pump. 
+
+The Basys3 board receives a signal with 1 byte of information via the GPIO pins ('1' for the open and '0' for the close). The initial format on the Basys3 board is 0b0000. When there is 0b0100, then the LEDs will be off; when there is 0b0010, the piezo buzzer will also be off. The C script is an executor and it executes the commands from the Rpi.
+
+For the complete {\it main.c}, please refer to the \hyperref[sec:enddata]{\textbf{Appendix.}} For the Vivado outputted Block diagram, please refer to \textbf{Figure \ref{fig:BlockDiagram}}.
+
+
+\newpage
+\subsection{Software}
+
+As outlined in the project requirements, groups were instructed to replace the Minicom program with a custom Python script that is purposely built to serve their personal system. 
+
+Our python script reads output data from the serial port that is being sent from the Basys 3 board. This data is collected and parsed to retrieve two important values--a reading from the moisture sensor and also a reading from the light sensor. Once these two values are available, our script can perform its two primary tasks.
+
+The first task the script is responsible for is to send three separate signals back to the Basys 3 board via the GPIO pins on the Raspberry Pi. The three pins send data in order to control the water pump, led lights, and piezo buzzer that are connected to the Basys 3 board. A binary unit is sent through the GPIO pins and interpreted by our C code embedded on the Basys 3 board \hyperref[sec:microblaze]{\textbf{(Microblaze {\it main.c}}).}
+
+\begin{figure}
+  \resizebox{14cm}{!}{\includegraphics{1f.png}}
+  \caption{Our minicom python script communicating to the Basys3 board via the GPIO pins.}
+  \label{fig:1}
+\end{figure}
+
+\textbf{Figure \ref{fig:3}}
+
+The script (\textbf{Figure \ref{fig:3}}) must determine key information from the data sent through the serial port before it is able to send a signal back to the Basys 3 board. We have configured 2 separate threshold values to control the components connected to the Basys 3 board in order to isolate when a plant does not have adequate water (moisture content) and when it is in a location that is too dim (not enough light).
+
+Once the serial data values are deemed to be below the threshold, we send an active signal (1 bit) through the GPIO pins individually. This will activate the water pump in the case that the moisture level is too low, and the lights plus the piezo buzzer if the light level is too dim. Once the serial data values return to a stable state which is above the threshold, we send a low signal through the GPIO pins to deactivate the respective components.
+
+The second task our script is responsible for, is transferring each reading we receive from the Basys 3 board to our web service. We send individual values for the moisture and water levels via an API request to our NodeJS web server which then stores the values for later use. More information can be found about our web service below \hyperref[sec:enddata]{\textbf{(End Data Application).}} Sending data to our web service is not critical in order to operate the system as a whole, therefore we gracefully handle any errors that occur within the API request and skip the transfer.
+
+\begin{figure}
+  \resizebox{14cm}{!}{\includegraphics{2j.png}}
+  \caption{Our minicom python script communicating to the web service on the Raspberry PI via an HTTP POST request.}
+  \label{fig:2}
+\end{figure}
+
+The python script runs in a continuous loop into an exit command is issued from the user (\textbf{Figure \ref{fig:2}}). In order to start the script, simply `cd` into the directory where the script is located and run `python minicom.py` (\textbf{NB:} our script is incompatible with Python 3).
+
+
+\subsection{End Data Application}
+\label{sec:enddata}
+
+Our web service is in charge of collecting and storing all readings sent by the Basys 3 board over to our Raspberry Pi. We track the readings of both moisture and light sensors, generating a timestamp for each request to determine when the reading came through.
+
+We are using a NodeJS \cite{nodejs} web server for our API endpoints, and LowDB \cite{lowdb} which is an NPM package that serves as a JSON file database rather than having to mess around configuring a MySQL or Postgres database.
+
+\begin{figure}
+  \resizebox{12cm}{!}{\includegraphics{3f.png}}
+  \caption{A concise version of our JSON file database from LowDB. The sensor data array will grow as requests are made from the minicom script to store data.}
+  \label{fig:3}
+\end{figure}
+
+As you can see from \textbf{Figure \ref{fig:3}}, we store an array of objects that were received from API requests to the web service, no data manipulation is done before it is stored.
+
+API requests to store data are sent as a POST request to `/api/sensor-data` (\textbf{Figure \ref{fig:4}}).
+
+To check the status of our web service, you can go to `/api/status` in a web browser.
+
+\begin{figure}
+  \resizebox{12cm}{!}{\includegraphics{4f.png}}
+  \caption{The two core API endpoints to our web service; one to check the current status and the other to post data to be stored.}
+  \label{fig:4}
+\end{figure}
+
+The homepage on our web server (\textbf{Figure \ref{fig:5}}) is a dynamic list of all data points we currently have stored into our database.
+
+\begin{figure}
+  \resizebox{12cm}{!}{\includegraphics{5.png}}
+  \caption{The homepage of our web service. From here we display all data from our database in a raw print out for the user to scan through and search. For a magnified copy refer to (\textbf{Figure \ref{fig:mag}}).}
+  \label{fig:5}
+\end{figure}
+
+Our web server is also configured with an integration to a push notification service called Pushover \cite{pushover}. Users of the system can download an application on their iPhone or Android device and configure the web service with a user token. Once setup, our web service can push two different notification types to users.
+
+The first push notification is a simple hourly update of the average light and moisture levels for the past hour. This gives the user a high level overview of how their plant is doing, and if there was a critical state imposed on their plant.
+
+The second push notification is triggered once the web service detects whether one of the values has passed above or below the threshold configured. These threshold values are the same as the ones found in the Python script. For example, let’s say your plant has had adequate light for a prolonged period of time and suddenly the bulb dies. The web service would detect the light value has passed under the threshold and notifies the users. It will only send out one critical push notification until the light level passes back above the threshold, in which the web service will issue a new push notification letting you know that your plant is shining bright once again. 
+
+Refer to the following section to \hyperref[sec:pushover]{\textbf{read} about how we overcame notification settings when setting up the web service.}
+
+\subsection{Team Collaboration and Learning}
+
+Not accounting for the standard challenges in group projects (for example, finding meeting times for everyone without conflicts and time management), in the following, we isolated a few challenges that taught us something.
+
+\label{sec:pushover}
+One of the challenges we faced when setting up the web service was figuring out a way to send push notifications to mobile devices. A simple email would have sufficed, but a push notification is a much more efficient way to communicate problems and updates to users regarding their plants.
+
+The first route we took was trying to setup a simple Android application which would receive push notification updates from our web service. We knew this process could get quite complicated, as it requires your computer to run Android Studio with the Android SDK and none of us had sufficient mobile development experience. After a few hours of trial and error, we quickly realized the scope of work we had just imposed on ourselves, and decided to research a more “out of the box” solution rather than creating something custom.
+
+Luckily we came across Pushover, which is exactly the type of system for which we were looking. Configuration was quite simple; setup and account on their website and grab your user token, download their Android and/or iPhone application and login to your account, plus install and configure a package on the web service using the user token in order to send out the push notifications.
+
+Furthermore, another challenge that we had was the instability of outputs during the project testing. Most failure testing outputs can mainly fall into two categories: outputs not meeting the expected outputs,  and uncommonly long propagation delay. In our case, our ambient light sensor and alarm had a very long delay. In order to find what caused the problem, we repeatedly examined C codes, Python codes and the hardware. 
+
+In the end, we located our error in the Python code--the threshold. Once we fixed the Python code, our system worked exactly as expected.
+
+Finally, during the process in writing the {\it main.c} code, the most difficult part was finding which port would receive the signal from the Rpi. It was also difficult to find the transformation between the received signal and the signal which was used to control components in the Basys3. This problem took ample time to figure out. But, with constant perseverance, and an all-nighter, finally, we combined our new knowledge of active-low signal, the return from Rpi and GPIO, and learned to understand signal transformation.
+
+\newpage
+\section{Conclusion}
+
+In summary, our system monitors light conditions and issues a warning when light is insufficient so that the owner may take preventative measures to add supplementary lighting. Furthermore, our plant hydration system automatically waters the plant when the moisture levels are low. However, the owner still has to refill the water reservoir. By following the operating procedures, any user should be able to achieve the exact results we have illustrated in our report. Through this project, we learned a great deal about the intricacies of establishing communication between hardware and software. Finally, we really applied perseverance in order to achieve our desired results.
+
+\newpage
+\section{References}
+
+\begin{thebibliography}{} 
+    
+    \bibitem{Git}Lazenka, A. (n.d.). AutoPlantHydration. Retrieved from https://github.co-m/ALazenka/AutoPlantHydration.
+    \bibitem{basys}Basys 3 Reference. (n.d.). Retrieved from https://reference.digilentinc.co-m/basys3/refmanual.
+    \bibitem{nodejs}NodeJS Foundation. (n.d.). Retrieved from https://nodejs.org/en/.
+    \bibitem{lowdb}Typicode. (2019, July 29). typicode/lowdb. Retrieved from https://github-.com/typicode/lowdb.
+    \bibitem{pushover}Simple Notifications for Android, iOS, and Desktop. (n.d.). Retrieved from https://pushover.net/.
+
+\end{thebibliography}
+
+
+% All reduce Graphs
+\newpage 
+    \section{Appendix} 
+
+\label{sec:main}
+Complete Microblaze main.c code
+\begin{lstlisting}
+/*
+ * main.c
+ *
+ *  Created on: Aug 23, 2019
+ *  Author: dave
+ *  Team: 1
+ *  Modified: November, 2019
+ */
+
+// AXI GPIO driver
+#include "xgpio.h"
+//send data over UART
+#include "xil_printf.h"
+// information about AXI peripherals
+#include "xparameters.h"
+#include "xsysmon.h"
+
+#define RX_BUFFER_SIZE 4 // defines how many XADC channels are read
+#define xadc XPAR_SYSMON_0_DEVICE_ID
+
+XSysMon xadc_inst;
+int xsts;
+char *channel[] ={"VAUX14","VAUX07","VAUX15","VAUX06"}; // for RawData printf
+int sample[4] = {XSM_CH_AUX_MIN + 14,XSM_CH_AUX_MIN + 7,XSM_CH_AUX_MIN + 15,XSM_CH_AUX_MIN + 6};
+// sample array used to specify channel when reading ADC data into XADC_Buf
+int main() {
+	XGpio gpio;
+	XGpio gpio1;
+	XGpio gpio2;
+	XGpio gpio3;
+	XGpio gpio4;
+	u32 a;
+	u32 btn, led;
+	u32 sw;
+	u32 jbin, digin, rpiin;
+	u32 jcout;
+	u32 bcdout;
+
+	XGpio_Initialize(&gpio,  0); //buttons and leds
+	XGpio_Initialize(&gpio1, 1); //switches
+	XGpio_Initialize(&gpio2, 2); //JB connector
+	XGpio_Initialize(&gpio3, 3); //JC connector
+	XGpio_Initialize(&gpio4, 4); //Seven Segment Display
+
+	XGpio_SetDataDirection(&gpio, 2, 0x00000000); // set led GPIO channel tristates to All Output
+	XGpio_SetDataDirection(&gpio, 1, 0xFFFFFFFF); // set BTN GPIO channel tristates to All Input
+	XGpio_SetDataDirection(&gpio1, 1, 0xFFFFFFFF); // set sw GPIO channel tristates to All Input
+	XGpio_SetDataDirection(&gpio2, 1, 0xFFFFFFFF); // set JB GPIO channel tristates to All Input
+	XGpio_SetDataDirection(&gpio3, 1, 0x00000000); // set JC GPIO channel tristates to All Output
+	XGpio_SetDataDirection(&gpio4, 1, 0x00000000); //set bcdout channel to ALL Outputs
+	int Index;
+	XSysMon *xadc_inst_ptr = &xadc_inst;
+	u32 XADC_Buf[RX_BUFFER_SIZE];
+	XSysMon_Config *xadc_config;
+
+	xil_printf("XADC Example\n\r");
+
+	xadc_config = XSysMon_LookupConfig(xadc);
+	if (NULL == xadc_config) {
+		xil_printf("XSysMon_LookupConfig failed\n");
+	}
+
+	XSysMon_CfgInitialize(xadc_inst_ptr,xadc_config,xadc_config->BaseAddress);
+
+	xsts=XSysMon_SelfTest(xadc_inst_ptr);
+	if (XST_SUCCESS != xsts) {
+		xil_printf("ADC self test failed\n");
+	}
+
+	XSysMon_SetSequencerMode(xadc_inst_ptr,XSM_SEQ_MODE_SAFE);
+	XSysMon_SetAlarmEnables(xadc_inst_ptr, 0x00000000);
+	XSysMon_SetSequencerMode(xadc_inst_ptr,XSM_SEQ_MODE_SAFE);
+	XSysMon_SetAlarmEnables(xadc_inst_ptr, 0x0);
+	xsts = XSysMon_SetSeqChEnables(xadc_inst_ptr,
+		XSM_SEQ_CH_AUX14 |
+		XSM_SEQ_CH_AUX07 |
+		XSM_SEQ_CH_AUX15 |
+		XSM_SEQ_CH_AUX06);
+
+	if (XST_SUCCESS != xsts) {
+		xil_printf("Failed to configure XSysMon_SetSeqChEnables\n");
+	}
+
+	xsts=XSysMon_SetSeqInputMode(xadc_inst_ptr,0);
+
+	if (XST_SUCCESS != xsts) {
+		xil_printf("Failed to configure all XADC channels as unipolar\n");
+	}
+
+	XSysMon_SetSequencerMode(xadc_inst_ptr,XSM_SEQ_MODE_CONTINPASS);
+
+	while(1) {
+		/********* PushButton, Switch, and Led Section *********/
+		btn = XGpio_DiscreteRead(&gpio, 1);
+		sw  = XGpio_DiscreteRead(&gpio1,1);
+		jbin  = XGpio_DiscreteRead(&gpio2,1);
+		digin = jbin & 0xF;
+		rpiin = (jbin & 0xF0)>>4;
+
+		if ((digin&0b0100)) // light sensor
+			led = 0x00000000;
+		else
+				led = sw;
+
+		if ((digin&0b0010)) // piezo buzzer
+			jcout = 0;
+		else
+			jcout = 3;
+
+		XGpio_DiscreteWrite(&gpio, 2, led);
+		XGpio_DiscreteWrite(&gpio3, 1, jcout);
+		XGpio_DiscreteWrite(&gpio4, 1, bcdout);
+		xil_printf("\rbutton state: %08x\n",btn);
+		xil_printf("\r jbin: %08x, digin: %08x, rpiin: %08x\n",jbin,digin,rpiin);
+
+		/***************************** XADC section **************/
+		XSysMon_GetStatus(xadc_inst_ptr); // Clear the old status
+		for (Index = 0;Index<RX_BUFFER_SIZE;Index++) {
+			while((XSysMon_GetStatus(xadc_inst_ptr)& XSM_SR_EOS_MASK) != XSM_SR_EOS_MASK) {
+				XADC_Buf[Index] = XSysMon_GetAdcData(xadc_inst_ptr,sample[Index]);
+			}
+		}
+
+		for(Index = 0;Index<RX_BUFFER_SIZE;Index++) {
+			xil_printf("RawData %s %d \n",channel[Index],(int)(XADC_Buf[Index]>>4));
+		}
+		xil_printf("   \n");
+		sleep(1);
+	}
+
+	return 0;
+}
+
+
+\end{lstlisting}
+
+\begin{figure}
+  \resizebox{12cm}{!}{\includegraphics{webservice.png}}
+  \caption{Magnified text from our web service in (\textbf{Figure \ref{fig:5}}).}
+  \label{fig:mag}
+\end{figure}
+
+\end{document}
