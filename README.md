@@ -21,3 +21,9 @@ Automates the process of
 - Save data collected into database using web service
 - Send data through Pusher (push notification service) from web service
 - Create simple webpage to display current and previous status of data
+
+#### Files in our Repo
+
+- 340Vivado.c: our modified Microblaze main.c code
+- minicom.py: our minicom replacement Python code
+- documentation.tex: our LaTeX code for the documentation
